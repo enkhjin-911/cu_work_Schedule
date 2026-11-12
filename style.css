@@ -1,0 +1,104 @@
+/* CU Mongolia - 7 хоногийн ажлын хуваарь */
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --purple:#5b2a86;--purple-2:#7b3fb0;--green:#8cc63f;
+  --bg:#f3f1f7;--card:#ffffff;--text:#1f1a2b;--muted:#6b6580;--line:#e3deec;
+  --chip:#f6f3fb;--accent:#5b2a86;--accent-bg:#ece3f7;--accent-text:#4a2170;
+  --ok:#1f7a4d;--err:#c0392b;--shadow:0 6px 24px rgba(60,30,100,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15121c;--card:#1f1b29;--text:#ece8f4;--muted:#a59fb8;--line:#363047;
+    --chip:#272234;--accent:#b48be6;--accent-bg:#352a4d;--accent-text:#dcc6f7;
+    --ok:#6fd3a0;--err:#ff8a7a;--shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15121c;--card:#1f1b29;--text:#ece8f4;--muted:#a59fb8;--line:#363047;
+  --chip:#272234;--accent:#b48be6;--accent-bg:#352a4d;--accent-text:#dcc6f7;
+  --ok:#6fd3a0;--err:#ff8a7a;--shadow:0 6px 24px rgba(0,0,0,.35);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+
+/* Толгой хэсэг */
+.hero{background:linear-gradient(135deg,var(--purple) 0%,var(--purple-2) 100%);
+  color:#fff;padding:26px 16px 70px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;
+  border-radius:50%;background:var(--green);opacity:.25}
+.hero::before{content:"";position:absolute;left:-40px;bottom:-90px;width:180px;height:180px;
+  border-radius:50%;background:#fff;opacity:.08}
+.brand{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.logo-chip{flex:none;width:76px;height:76px;border-radius:18px;background:#fff;
+  display:flex;align-items:center;justify-content:center;padding:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.logo-chip img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.logo-chip.nologo img{display:none}
+.logo-chip.nologo::after{content:"CU";font-weight:800;font-size:1.7rem;letter-spacing:.02em;color:var(--purple)}
+.eyebrow{margin:0;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+h1{font-size:1.55rem;line-height:1.2;margin:2px 0 4px}
+.sub{margin:0;opacity:.9;font-size:.95rem}
+
+main{max-width:760px;margin:-46px auto 0;padding:0 14px 40px;position:relative;z-index:2}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+
+/* Нэр */
+label.name{display:block;font-weight:600;margin-bottom:6px}
+input[type=text]{width:100%;padding:13px 14px;font-size:1rem;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--chip);color:var(--text);transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-bg)}
+
+/* Өдрүүд */
+#days{margin-top:14px}
+.day{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;
+  padding:12px 0;border-top:1px dashed var(--line)}
+.day:first-child{border-top:0}
+.day b{display:inline-block;padding:7px 12px;border-radius:10px;background:var(--accent-bg);
+  color:var(--accent-text);text-align:center;font-size:.92rem}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts label{padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;
+  font-size:.9rem;background:var(--chip);transition:all .15s;user-select:none}
+.opts label:hover{border-color:var(--accent)}
+.opts input:checked+label{background:var(--purple);border-color:var(--purple);color:#fff;font-weight:600}
+:root[data-theme="dark"] .opts input:checked+label{background:var(--accent);border-color:var(--accent);color:#1a1028}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .opts input:checked+label{background:var(--accent);border-color:var(--accent);color:#1a1028}
+}
+.opts input:focus-visible+label{outline:3px solid var(--green);outline-offset:2px}
+.opts input[value="Амрах"]:checked+label{background:var(--green);border-color:var(--green);color:#1c2b08}
+
+/* Товчнууд */
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:14px 18px;width:100%;
+  font-weight:700;color:#fff;background:linear-gradient(135deg,var(--purple),var(--purple-2));
+  margin-top:8px;transition:transform .1s,filter .15s}
+button:hover{filter:brightness(1.08)}
+button:active{transform:scale(.99)}
+button:disabled{opacity:.6;cursor:default}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--text);
+  width:auto;padding:4px 10px;font-weight:500;font-size:.8rem;margin:0}
+#msg{margin-top:12px;min-height:1.4em;font-size:.93rem;font-weight:500}
+.ok{color:var(--ok)}.err{color:var(--err)}
+
+/* Хүснэгт */
+.hint{color:var(--muted);font-size:.88rem;margin:0 0 10px}
+.scroll{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.84rem;min-width:660px}
+th,td{padding:9px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{background:var(--accent-bg);color:var(--accent-text);font-weight:700}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:var(--chip)}
+td.n{text-align:left;font-weight:600}
+
+@media (max-width:520px){
+  .day{grid-template-columns:1fr;gap:8px}
+  .day b{justify-self:start}
+  h1{font-size:1.3rem}
+  .logo-chip{width:62px;height:62px}
+}

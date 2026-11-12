@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CU Mongolia | 7 хоногийн ажлын хуваарь</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="brand">
+    <div class="logo-chip"><img id="logo" src="logo.png" alt="CU Mongolia" onerror="this.parentElement.classList.add('nologo')"></div>
+    <div>
+      <p class="eyebrow">CU Mongolia</p>
+      <h1>7 хоногийн ажлын хуваарь</h1>
+      <p class="sub">Нэрээ оруулаад, өдөр бүр ажиллах цагаа сонгоно уу.</p>
+    </div>
+  </div>
+</header>
+<main>
+<div class="card">
+  <label class="name" for="nm">Нэр</label>
+  <input type="text" id="nm" placeholder="Овог, нэр" autocomplete="name">
+  <div id="days"></div>
+  <button id="send" type="button">Хуваарь илгээх</button>
+  <div id="msg" role="status"></div>
+</div>
+<div class="card">
+  <h2>Бүх ажилтны хуваарь</h2>
+  <p class="hint" id="state">Ачаалж байна...</p>
+  <div class="scroll"><table id="tbl" hidden>
+    <thead><tr id="thead"></tr></thead><tbody id="tbody"></tbody>
+  </table></div>
+</div>
+</main>
+<script>
+const DAYS=["Даваа","Мягмар","Лхагва","Пүрэв","Баасан","Бямба","Ням"];
+const SHIFTS=["00:00-08:00","08:00-16:00","12:00-20:00","16:00-00:00"];
+const OFF="Амрах";
+const $=id=>document.getElementById(id);
+let db=null, myId=null, isOwner=false;
+
+// Form
+const box=$("days");
+DAYS.forEach((d,i)=>{
+  const div=document.createElement("div");div.className="day";
+  const b=document.createElement("b");b.textContent=d;div.appendChild(b);
+  const o=document.createElement("div");o.className="opts";
+  [...SHIFTS,OFF].forEach((s,j)=>{
+    const id="d"+i+"_"+j;
+    const r=document.createElement("input");r.type="radio";r.name="day"+i;r.value=s;r.id=id;
+    const l=document.createElement("label");l.htmlFor=id;l.textContent=s;
+    o.appendChild(r);o.appendChild(l);
+  });
+  div.appendChild(o);box.appendChild(div);
+});
+
+// Table header
+const th=$("thead");
+["Нэр",...DAYS,""].forEach(t=>{const e=document.createElement("th");e.textContent=t;th.appendChild(e)});
+
+function setMsg(t,c){const m=$("msg");m.textContent=t;m.className=c||""}
+
+function fillForm(data){
+  $("nm").value=data.name||"";
+  DAYS.forEach((d,i)=>{
+    const v=(data.shifts||{})[d];
+    document.querySelectorAll('input[name="day'+i+'"]').forEach(r=>{r.checked=(r.value===v)});
+  });
+}
+
+function render(docs){
+  const body=$("tbody");body.textContent="";
+  $("tbl").hidden=docs.length===0;
+  $("state").textContent=docs.length?docs.length+" ажилтан хуваарьаа илгээсэн":"Одоогоор хуваарь орсонгүй байна.";
+  docs.forEach(d=>{
+    const v=d.data()||{};
+    const tr=document.createElement("tr");
+    const n=document.createElement("td");n.className="n";n.textContent=v.name||"-";tr.appendChild(n);
+    DAYS.forEach(day=>{const td=document.createElement("td");td.textContent=(v.shifts||{})[day]||"-";tr.appendChild(td)});
+    const a=document.createElement("td");
+    if(isOwner){
+      const bt=document.createElement("button");bt.className="ghost";bt.textContent="Устгах";
+      bt.onclick=async()=>{if(confirm((v.name||"")+" -н хуваарийг устгах уу?")){try{await db.doc("schedules/"+d.id).delete()}catch(e){setMsg("Устгаж чадсангүй.","err")}}};
+      a.appendChild(bt);
+    }
+    tr.appendChild(a);body.appendChild(tr);
+    if(d.id===myId&&!$("nm").dataset.touched){fillForm(v)}
+  });
+}
+
+$("nm").addEventListener("input",()=>{$("nm").dataset.touched="1"});
+document.getElementById("days").addEventListener("change",()=>{$("nm").dataset.touched="1"});
+
+$("send").onclick=async()=>{
+  const name=$("nm").value.trim();
+  if(!name){setMsg("Нэрээ оруулна уу.","err");return}
+  const shifts={};
+  for(let i=0;i<DAYS.length;i++){
+    const c=document.querySelector('input[name="day'+i+'"]:checked');
+    if(!c){setMsg(DAYS[i]+" гарагийн сонголтоо хийнэ үү.","err");return}
+    shifts[DAYS[i]]=c.value;
+  }
+  if(!db||!myId){setMsg("Нэвтрээгүй байна. Нэвтэрч ороод дахин оролдоно уу.","err");return}
+  $("send").disabled=true;
+  try{
+    await db.doc("schedules/"+myId).set({name,shifts,updated:new Date().toISOString()});
+    setMsg("Хуваарь амжилттай хадгалагдлаа.","ok");
+  }catch(e){setMsg("Хадгалж чадсангүй. Эрх хүрэхгүй эсвэл холболтын алдаа байж магадгүй.","err")}
+  $("send").disabled=false;
+};
+
+(async()=>{
+  const timer=setTimeout(()=>{if(!db)$("state").textContent="Өгөгдлийн санд холбогдож чадсангүй."},10000);
+  try{
+    const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
+    clearTimeout(timer);
+    if(!d||!u){$("state").textContent="Зөвхөн нэвтэрсэн хэрэглэгчид харагдана.";return}
+    db=d;myId=await u.id();isOwner=u.isOwner();
+    db.collection("schedules").onSnapshot(s=>render(s.docs),()=>{$("state").textContent="Уншиж чадсангүй."});
+  }catch(e){$("state").textContent="Алдаа гарлаа."}
+})();
+
+// Лого байхгүй бол "CU" тэмдэг харуулна
+(function(){const i=document.getElementById("logo");
+  if(i&&i.complete&&i.naturalWidth===0)i.parentElement.classList.add("nologo")})();
+</script>
+</body>
+</html>
